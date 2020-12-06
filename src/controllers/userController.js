@@ -1,10 +1,23 @@
 const User = require("../models/userModel");
 
-exports.create = (req, res) => {
-  User.create(req.body)
-    .then((res) => res.status(200).json(res))
-    .catch((err) => res.status(400).json(err));
+exports.create = async (req, res) => {
+  const user = await User({
+    username: req.body.username,
+    password: req.body.password,
+  });
+  try {
+    const newUser = await user.save();
+    res.status(200).json(newUser);
+  } catch (err) {
+    res.status(400).json(err);
+  }
 };
+// create user with func, not async func:
+// exports.create = (req, res) => {
+//   User.create(req.body)
+//     .then((res) => res.status(200).json(res))
+//     .catch((err) => res.status(400).json(err));
+// };
 
 exports.getOneById = (req, res) => {
   const id = req.params.id;
@@ -17,6 +30,12 @@ exports.getOneById = (req, res) => {
       }
     })
     .catch((err) => res.send(err));
+};
+
+exports.getAllUsers = (req, res) => {
+  User.find()
+    .then((users) => res.status(200).json(users))
+    .catch((err) => res.status(400).json(err));
 };
 
 exports.updateById = (req, res) => {
@@ -38,14 +57,14 @@ exports.login = (req, res) => {
     .then((user) => {
       if (!user) {
         res.status(401).json({
-          message: "User not found.",
+          message: "User Not Found!",
         });
       } else {
         if (user.validatePassword(req.body.password)) {
           res.status(200).json(user);
         } else {
           res.status(401).json({
-            message: "The username/password is incorrect",
+            message: "The username/password is incorrect!",
           });
         }
       }
